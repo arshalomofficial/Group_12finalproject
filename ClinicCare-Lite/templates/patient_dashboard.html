@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Patient Dashboard — ClinicCare-Lite{% endblock %}
+{% block content %}
+
+<!-- Page header -->
+<div class="page-header">
+  <h1>
+    <i class="bi bi-person-heart me-2" style="color:var(--green)"></i>
+    Welcome, {{ user.name }}
+  </h1>
+  <div style="display:flex;gap:8px">
+    <a href="{{ url_for('set_theme', theme='colorful') }}" class="btn btn-outline btn-sm">
+      <i class="bi bi-palette"></i> Colorful
+    </a>
+    <a href="{{ url_for('set_theme', theme='dark') }}" class="btn btn-outline btn-sm">
+      <i class="bi bi-moon-stars"></i> Dark
+    </a>
+    <a href="{{ url_for('set_theme', theme='default') }}" class="btn btn-outline btn-sm">
+      <i class="bi bi-sun"></i> Default
+    </a>
+  </div>
+</div>
+
+<!-- Announcements -->
+{% for aid, a in announcements.items() %}
+  <div class="app-flash app-flash-{{ 'error' if a.urgent else 'info' }}">
+    <i class="bi {{ 'bi-megaphone-fill' if a.urgent else 'bi-info-circle-fill' }}"></i>
+    {{ a.text }}
+  </div>
+{% endfor %}
+
+<!-- Upcoming reminders -->
+{% if upcoming_reminders %}
+<div class="reminder-strip">
+  <i class="bi bi-calendar-event-fill"></i>
+  <strong>Upcoming:</strong>
+  {% for t in upcoming_reminders %}
+    {{ t.title }} (due {{ t.due_date }}){% if not loop.last %} &nbsp;·&nbsp; {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Engagement stats -->
+<div class="stat-row" style="grid-template-columns:repeat(3,1fr)">
+  <div class="stat-card">
+    <div class="s-num warn">{{ engagement.points }}</div>
+    <div class="s-label">Engagement Points</div>
+    <div style="font-size:0.68rem;color:var(--text-light);margin-top:3px">Private — visible only to you</div>
+  </div>
+  <div class="stat-card">
+    <div class="s-num">{{ engagement.tasks_completed_on_time }}</div>
+    <div class="s-label">On-time Completions</div>
+  </div>
+  <div class="stat-card">
+    <div class="s-num info">{{ engagement.total_submissions }}</div>
+    <div class="s-label">Total Submissions</div>
+  </div>
+</div>
+
+<!-- Two-column layout -->
+<div class="two-col">
+
+  <!-- LEFT — tasks -->
+  <div>
+    <div class="card">
+      <div class="card-title">
+        <span class="icon"><i class="bi bi-clipboard2-pulse"></i></span>
+        My Health Tasks
+      </div>
+      {% if not tasks %}
+        <p style="color:var(--text-light);font-size:0.84rem">No tasks assigned yet.</p>
+      {% else %}
+        {% for tid, t in tasks.items() %}
+        <div class="task-item {{ 'overdue' if t.due_date < today else '' }}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px">
+            <span class="t-title">{{ t.title }}</span>
+            <span class="badge {{ 'badge-escalated' if t.due_date < today else 'badge-followup' }}">
+              {{ t.due_date }}
+            </span>
+          </div>
+          <p class="t-desc">{{ t.description }}</p>
+          <form method="POST" action="{{ url_for('submit_task', task_id=tid) }}"
+                enctype="multipart/form-data">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="file" name="file" class="f-input" style="flex:1;padding:6px 10px"
+                     accept=".txt,.csv,.pdf" required>
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-upload"></i> Submit
+              </button>
+            </div>
+            <p class="f-hint mt-1">Accepted: .txt, .csv, .pdf &nbsp;·&nbsp; Max 5 MB</p>
+          </form>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT — submissions + inbox -->
+  <div>
+
+    <div class="card mb-3" style="margin-bottom:1.2rem">
+      <div class="card-title">
+        <span class="icon"><i class="bi bi-journal-check"></i></span>
+        My Submissions &amp; Reviews
+      </div>
+      {% if not submissions %}
+        <p style="color:var(--text-light);font-size:0.84rem">No submissions yet.</p>
+      {% else %}
+        <table class="cc-table">
+          <thead><tr><th>Task</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody>
+          {% for sid, s in submissions.items() %}
+            <tr>
+              <td>{{ tasks[s.task_id].title if s.task_id in tasks else '—' }}</td>
+              <td>
+                {% if s.review_status == 'Pending' %}<span class="badge badge-pending">Pending</span>
+                {% elif 'Normal' in s.review_status %}<span class="badge badge-normal">{{ s.review_status }}</span>
+                {% elif 'Escalated' in s.review_status %}<span class="badge badge-escalated">{{ s.review_status }}</span>
+                {% else %}<span class="badge badge-followup">{{ s.review_status }}</span>{% endif %}
+              </td>
+              <td style="color:var(--text-light);font-size:0.8rem">{{ s.review_notes or '—' }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="icon"><i class="bi bi-chat-dots"></i></span>
+        Inbox
+      </div>
+      {% if not inbox %}
+        <p style="color:var(--text-light);font-size:0.84rem">No messages yet.</p>
+      {% else %}
+        {% for m in inbox[:6] %}
+        <div class="inbox-item">
+          <span class="i-time"><i class="bi bi-clock me-1"></i>{{ m.timestamp[:16] }}</span>
+          {{ m.content }}
+        </div>
+        {% endfor %}
+      {% endif %}
+
+      <hr class="cc-divider">
+
+      {% set clinician_id = '' %}
+      {% for tid, t in tasks.items() %}
+        {% if t.created_by and not clinician_id %}{% set clinician_id = t.created_by %}{% endif %}
+      {% endfor %}
+
+      {% if clinician_id %}
+      <form method="POST" action="{{ url_for('send_message') }}">
+        <input type="hidden" name="recipient_id" value="{{ clinician_id }}">
+        <div class="f-group">
+          <label class="f-label">Message your clinician</label>
+          <textarea name="content" class="f-input f-textarea" rows="2"
+                    placeholder="Non-urgent message only…" required></textarea>
+          <p class="f-hint"><i class="bi bi-exclamation-triangle me-1"></i>Not monitored continuously — do not use for emergencies.</p>
+        </div>
+        <button type="submit" class="btn btn-outline btn-sm">
+          <i class="bi bi-send"></i> Send
+        </button>
+      </form>
+      {% else %}
+        <p style="color:var(--text-light);font-size:0.8rem">No clinician assigned yet.</p>
+      {% endif %}
+    </div>
+
+  </div><!-- end right -->
+</div><!-- end two-col -->
+{% endblock %}

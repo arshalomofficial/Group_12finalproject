@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Register — ClinicCare-Lite{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+
+    <!-- LEFT — form -->
+    <div class="auth-left">
+      <div class="auth-logo">CCL</div>
+
+      <h2>Create Account</h2>
+      <p class="auth-sub">Fill in your details to get started</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div class="auth-flash auth-flash-{{ 'success' if cat == 'success' else 'error' }}">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST">
+        <div class="auth-field">
+          <select name="role" required>
+            <option value="">Select Role…</option>
+            <option value="clinician">Clinician</option>
+            <option value="patient">Patient</option>
+          </select>
+        </div>
+        <div class="auth-field">
+          <input type="text" name="user_id" placeholder="User ID (8 digits)"
+                 maxlength="8" required>
+          <p class="field-hint">Clinician IDs end in 0000 &nbsp;·&nbsp; Patient IDs end in year 2022–2028</p>
+        </div>
+        <div class="auth-field">
+          <input type="text" name="name" placeholder="Full Name" required>
+        </div>
+        <div class="auth-field">
+          <input type="email" name="email" placeholder="Email" required>
+        </div>
+        <div class="auth-field">
+          <input type="password" name="password" placeholder="Password" required>
+          <p class="field-hint">Min 8 chars · uppercase · lowercase · digit · special char (!@#$%^&amp;*)</p>
+        </div>
+        <button type="submit" class="btn-green">Sign Up</button>
+      </form>
+
+      <div class="auth-bottom">
+        Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+      </div>
+    </div>
+
+    <!-- RIGHT — green panel + photo -->
+    <div class="auth-right">
+      <div class="auth-right-top">
+        <h3>Smart Healthcare,<br>Seamless Management!</h3>
+        <p>"Transforming clinic administration with secure and intelligent patient management."</p>
+      </div>
+      <div class="auth-right-img"></div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

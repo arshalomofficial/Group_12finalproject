@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Log In — ClinicCare-Lite{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+
+    <!-- LEFT — form -->
+    <div class="auth-left">
+      <div class="auth-logo">CCL</div>
+
+      <h2>Welcome!</h2>
+      <p class="auth-sub">Enter your credentials to access the system</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div class="auth-flash auth-flash-{{ 'success' if cat == 'success' else 'error' }}">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST">
+        <div class="auth-field">
+          <input type="text" name="user_id" placeholder="User ID (8 digits)"
+                 maxlength="8" required autofocus>
+        </div>
+        <div class="auth-field">
+          <input type="password" name="password" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn-green">Log In</button>
+      </form>
+
+      <div class="auth-bottom">
+        No account yet? <a href="{{ url_for('register') }}">Register here</a>
+      </div>
+    </div>
+
+    <!-- RIGHT — green panel + photo -->
+    <div class="auth-right">
+      <div class="auth-right-top">
+        <h3>Smart Healthcare,<br>Seamless Management!</h3>
+        <p>"Transforming clinic administration with secure and intelligent patient management."</p>
+      </div>
+      <div class="auth-right-img"></div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

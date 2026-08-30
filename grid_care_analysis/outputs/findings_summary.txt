@@ -1,0 +1,32 @@
+GRID ANALYSIS - KEY FINDINGS
+==============================
+
+Dataset: 10 utilities, 44 substations, 55 lines
+
+EDA
+  Most substations region : Greater Accra
+  Most common voltage     : 161 kV
+  Active substations      : 97.7%
+  Lines under maintenance : 3.6%
+
+NETWORK
+  Nodes / Edges           : 44 / 55
+  Components              : 3
+  Avg clustering          : 0.3667
+  Diameter                : 14
+  Avg path length         : 5.409
+  Communities             : 10
+  Bridge lines            : 21
+
+TOP NODES
+  Degree centrality    : Mallam (0.1163)
+  Betweenness          : Cape Coast (0.5255)
+  Closeness            : Cape Coast (0.2641)
+  PageRank             : Bolgatanga (0.0470)
+
+N-1 RESULT
+  Remove 'Mallam': 3 -> 3 components
+  Stays connected
+
+IMPORTANT: all data is synthetic - not real Ghana grid measurements.
+Centrality scores are structural proxies, not electrical load values.

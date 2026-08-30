@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block title %}Clinician Dashboard — ClinicCare-Lite{% endblock %}
+{% block content %}
+
+<!-- Page header -->
+<div class="page-header">
+  <h1>
+    <i class="bi bi-hospital me-2" style="color:var(--green)"></i>
+    Welcome, Dr. {{ user.name }}
+  </h1>
+  <a href="{{ url_for('clinician_analytics') }}" class="btn btn-outline">
+    <i class="bi bi-bar-chart-line"></i> View Analytics
+  </a>
+</div>
+
+<!-- Announcements -->
+{% for aid, a in announcements.items() %}
+  <div class="app-flash app-flash-{{ 'error' if a.urgent else 'info' }}">
+    <i class="bi {{ 'bi-megaphone-fill' if a.urgent else 'bi-info-circle-fill' }}"></i>
+    {{ a.text }}
+  </div>
+{% endfor %}
+
+<!-- Stats -->
+<div class="stat-row">
+  <div class="stat-card">
+    <div class="s-num">{{ analytics.total_tasks }}</div>
+    <div class="s-label">Health Tasks</div>
+  </div>
+  <div class="stat-card">
+    <div class="s-num info">{{ analytics.total_submissions }}</div>
+    <div class="s-label">Submissions</div>
+  </div>
+  <div class="stat-card">
+    <div class="s-num warn">{{ analytics.pending_reviews }}</div>
+    <div class="s-label">Pending</div>
+  </div>
+  <div class="stat-card">
+    <div class="s-num">{{ analytics.reviewed_count }}</div>
+    <div class="s-label">Reviewed</div>
+  </div>
+  <div class="stat-card">
+    <div class="s-num danger">{{ analytics.overdue_count }}</div>
+    <div class="s-label">Overdue</div>
+  </div>
+  <div class="stat-card">
+    <div class="s-num info">{{ analytics.completion_rate }}%</div>
+    <div class="s-label">Completion</div>
+  </div>
+</div>
+
+<!-- Two-column main area -->
+<div class="two-col">
+
+  <!-- LEFT -->
+  <div>
+
+    <!-- Create task -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon"><i class="bi bi-plus-lg"></i></span>
+        Create Health Task
+      </div>
+      <form method="POST" action="{{ url_for('create_task') }}">
+        <div class="f-group">
+          <label class="f-label">Task Title</label>
+          <input type="text" name="title" class="f-input" placeholder="e.g. Daily BP Log" required>
+        </div>
+        <div class="f-group">
+          <label class="f-label">Instructions for the patient</label>
+          <textarea name="description" class="f-input f-textarea" rows="3"
+                    placeholder="Describe what the patient should do…" required></textarea>
+        </div>
+        <div class="f-group">
+          <label class="f-label">Due Date</label>
+          <input type="date" name="due_date" class="f-input" required>
+        </div>
+        {% if patients %}
+        <div class="f-group">
+          <label class="f-label">Assign to (leave blank = all patients)</label>
+          {% for pid, p in patients.items() %}
+          <label class="cc-check">
+            <input type="checkbox" name="assigned_patients" value="{{ pid }}">
+            {{ p.name }} <span style="color:#bcc5ce;font-size:0.75rem">({{ pid }})</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary btn-full">
+          <i class="bi bi-send"></i> Assign Task
+        </button>
+      </form>
+    </div>
+
+    <!-- Announcement -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon"><i class="bi bi-megaphone"></i></span>
+        Post Announcement
+      </div>
+      <form method="POST" action="{{ url_for('create_announcement') }}">
+        <div class="f-group">
+          <textarea name="text" class="f-input f-textarea" rows="3"
+                    placeholder="Type your announcement…" required></textarea>
+        </div>
+        <label class="cc-check mb-3">
+          <input type="checkbox" name="urgent">
+          Mark as urgent (notifies all patients immediately)
+        </label>
+        <button type="submit" class="btn btn-outline btn-full">
+          <i class="bi bi-broadcast"></i> Post
+        </button>
+      </form>
+    </div>
+
+    <!-- Inbox -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon"><i class="bi bi-chat-dots"></i></span>
+        Inbox
+      </div>
+      {% if not inbox %}
+        <p style="color:var(--text-light);font-size:0.84rem">No messages yet.</p>
+      {% else %}
+        {% for m in inbox[:5] %}
+        <div class="inbox-item">
+          <span class="i-time"><i class="bi bi-clock me-1"></i>{{ m.timestamp[:16] }}</span>
+          {{ m.content }}
+        </div>
+        {% endfor %}
+      {% endif %}
+      <hr class="cc-divider">
+      <form method="POST" action="{{ url_for('send_message') }}">
+        <div class="f-group">
+          <label class="f-label">Send message to patient</label>
+          <select name="recipient_id" class="f-input f-select" required>
+            <option value="">Choose patient…</option>
+            {% for pid, p in patients.items() %}
+              <option value="{{ pid }}">{{ p.name }} ({{ pid }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="f-group">
+          <textarea name="content" class="f-input f-textarea" rows="2"
+                    placeholder="Non-urgent message only" required></textarea>
+          <p class="f-hint"><i class="bi bi-exclamation-triangle me-1"></i>Not monitored continuously — not for emergencies.</p>
+        </div>
+        <button type="submit" class="btn btn-outline btn-sm">
+          <i class="bi bi-send"></i> Send
+        </button>
+      </form>
+    </div>
+
+  </div><!-- end left -->
+
+  <!-- RIGHT -->
+  <div>
+    <div class="card">
+      <div class="card-title">
+        <span class="icon"><i class="bi bi-inbox"></i></span>
+        Submissions Awaiting Review
+      </div>
+
+      {% set has_pending = [] %}
+      {% for sid, s in submissions.items() %}
+        {% if s.review_status == 'Pending' %}{% set _ = has_pending.append(1) %}{% endif %}
+      {% endfor %}
+
+      {% if not has_pending %}
+        <p style="color:var(--text-light);font-size:0.84rem;margin-bottom:1.5rem">
+          <i class="bi bi-check2-all me-1" style="color:var(--green)"></i> All caught up — nothing pending.
+        </p>
+      {% else %}
+        {% for sid, s in submissions.items() %}
+          {% if s.review_status == 'Pending' %}
+          <div class="task-item mb-3">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px">
+              <span class="t-title">{{ tasks[s.task_id].title if s.task_id in tasks else 'Unknown task' }}</span>
+              <span class="badge badge-pending">Pending</span>
+            </div>
+            <p style="font-size:0.77rem;color:var(--text-light);margin-bottom:8px">
+              Patient: {{ s.patient_id }} &nbsp;·&nbsp; {{ s.timestamp[:10] }}
+              &nbsp;·&nbsp;
+              <a href="{{ url_for('download_file', patient_id=s.patient_id, filename=s.file_path.split('/')[-1]) }}"
+                 style="color:var(--green);text-decoration:none;font-weight:600">
+                <i class="bi bi-download"></i> download
+              </a>
+            </p>
+            <form method="POST" action="{{ url_for('review_submission', submission_id=sid) }}">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                <select name="outcome" class="f-input f-select" style="flex:1;min-width:150px" required>
+                  {% for o in review_outcomes %}
+                    <option value="{{ o }}" {% if o=='Pending' %}disabled{% endif %}>{{ o }}</option>
+                  {% endfor %}
+                </select>
+                <input type="text" name="notes" class="f-input" style="flex:2;min-width:100px"
+                       placeholder="Notes (optional)">
+                <button type="submit" class="btn btn-primary btn-sm">
+                  <i class="bi bi-check2"></i> Save
+                </button>
+              </div>
+            </form>
+          </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      <!-- All submissions table -->
+      <p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-top:1rem;margin-bottom:0.5rem">All Submissions</p>
+      {% if submissions %}
+      <table class="cc-table">
+        <thead><tr><th>Patient</th><th>Task</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+        {% for sid, s in submissions.items() %}
+          <tr>
+            <td>{{ s.patient_id }}</td>
+            <td>{{ tasks[s.task_id].title if s.task_id in tasks else '—' }}</td>
+            <td>
+              {% if s.review_status == 'Pending' %}<span class="badge badge-pending">Pending</span>
+              {% elif 'Normal' in s.review_status %}<span class="badge badge-normal">{{ s.review_status }}</span>
+              {% elif 'Escalated' in s.review_status %}<span class="badge badge-escalated">{{ s.review_status }}</span>
+              {% else %}<span class="badge badge-followup">{{ s.review_status }}</span>{% endif %}
+            </td>
+            <td>{{ s.timestamp[:10] }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p style="color:var(--text-light);font-size:0.83rem">No submissions yet.</p>
+      {% endif %}
+    </div>
+  </div><!-- end right -->
+
+</div><!-- end two-col -->
+{% endblock %}

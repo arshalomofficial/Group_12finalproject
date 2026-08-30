@@ -1,0 +1,18 @@
+{
+  "12350000": {
+    "user_id": "12350000",
+    "name": "Dr Adjei",
+    "email": "doc@clinic.com",
+    "password_hash": "$2b$12$MHQqj93EGdCsj.lXdhoO..hESfNOB9IFaad8I2gNr8Pv90Rha.2Au",
+    "role": "clinician",
+    "registered_at": "2026-08-28T00:44:48.911165"
+  },
+  "12342024": {
+    "user_id": "12342024",
+    "name": "Ama Owusu",
+    "email": "ama@test.com",
+    "password_hash": "$2b$12$bAuZDci89fKoBiiJcnhtpuyzC6/ZuQZDjA7I/Hh5VphvN/sEn0NMK",
+    "role": "patient",
+    "registered_at": "2026-08-28T00:45:57.786124"
+  }
+}

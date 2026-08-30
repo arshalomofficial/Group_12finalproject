@@ -1,0 +1,18 @@
+{
+  "12350000": {
+    "user_id": "12350000",
+    "name": "Dr Adjei",
+    "email": "doc@clinic.com",
+    "password_hash": "<bcrypt hash of Clinician1!>",
+    "role": "clinician",
+    "registered_at": "2026-08-01T09:00:00"
+  },
+  "12342024": {
+    "user_id": "12342024",
+    "name": "Ama Owusu",
+    "email": "ama@example.com",
+    "password_hash": "<bcrypt hash of Patient123!>",
+    "role": "patient",
+    "registered_at": "2026-08-01T10:00:00"
+  }
+}

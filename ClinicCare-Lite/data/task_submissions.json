@@ -1,0 +1,24 @@
+{
+  "1a7887a6": {
+    "submission_id": "1a7887a6",
+    "task_id": "1",
+    "patient_id": "12342024",
+    "file_path": "/Users/nyokgai/Downloads/CsProject/CS112_Final_Project/project/ClinicCare-Lite/submissions/12342024/1_20260828_025452_03_grace_adu_marketing_specialist.pdf",
+    "timestamp": "2026-08-28T02:54:52.154900",
+    "review_status": "Pending",
+    "review_notes": "",
+    "reviewer_id": "",
+    "completeness_issues": []
+  },
+  "fd3aca1b": {
+    "submission_id": "fd3aca1b",
+    "task_id": "2",
+    "patient_id": "12342024",
+    "file_path": "C:\\Users\\HOME PC\\Downloads\\CsProject\\CsProject\\CS112_Final_Project\\project\\ClinicCare-Lite\\submissions\\12342024\\2_20260828_192220_CONSUMER AND PRODUCER SURPLUS.pdf",
+    "timestamp": "2026-08-28T19:22:20.370938",
+    "review_status": "Pending",
+    "review_notes": "",
+    "reviewer_id": "",
+    "completeness_issues": []
+  }
+}

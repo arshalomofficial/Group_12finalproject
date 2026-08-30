@@ -1,0 +1,11 @@
+{
+  "1": {
+    "task_id": "1",
+    "title": "Daily Blood Pressure Log",
+    "description": "Record your blood pressure reading each morning and upload as a CSV.",
+    "due_date": "2026-09-01",
+    "created_by": "12350000",
+    "assigned_patients": ["12342024"],
+    "created_at": "2026-08-01T09:30:00"
+  }
+}

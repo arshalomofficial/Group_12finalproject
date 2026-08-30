@@ -1,0 +1,18 @@
+{
+  "e069c2ae": {
+    "msg_id": "e069c2ae",
+    "sender_id": "12350000",
+    "recipient_id": "12342024",
+    "content": "urgent",
+    "timestamp": "2026-08-28T01:28:33.269541",
+    "read": false
+  },
+  "41ab0fc8": {
+    "msg_id": "41ab0fc8",
+    "sender_id": "12350000",
+    "recipient_id": "12342024",
+    "content": "hhh",
+    "timestamp": "2026-08-28T02:53:03.064759",
+    "read": false
+  }
+}
